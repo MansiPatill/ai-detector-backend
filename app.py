@@ -5,7 +5,7 @@ import time
 app = Flask(__name__)
 
 # --- PASTE YOUR ACTUAL TOKEN HERE ---
-HF_API_KEY = "YOUR_HUGGING_FACE_TOKEN_HERE" 
+HF_API_KEY = "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" 
 HEADERS = {"Authorization": f"Bearer {HF_API_KEY}"}
 
 TEXT_API_URL = "https://api-inference.huggingface.co/models/roberta-base-openai-detector"
