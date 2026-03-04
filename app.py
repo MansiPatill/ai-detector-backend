@@ -4,32 +4,34 @@ import time
 
 app = Flask(__name__)
 
-HF_API_KEY = "YOUR_HUGGING_FACE_TOKEN_HERE"
+# --- PASTE YOUR ACTUAL TOKEN HERE ---
+HF_API_KEY = "YOUR_HUGGING_FACE_TOKEN_HERE" 
 HEADERS = {"Authorization": f"Bearer {HF_API_KEY}"}
 
-# AI Model URLs
 TEXT_API_URL = "https://api-inference.huggingface.co/models/roberta-base-openai-detector"
 IMAGE_API_URL = "https://api-inference.huggingface.co/models/umm-maybe/AI-image-detector"
 
 def query_model(url, data, is_binary=False):
-    """Helper to retry if the model is still loading"""
-    for _ in range(3):  # Try 3 times
+    for _ in range(3):
         if is_binary:
             response = requests.post(url, headers=HEADERS, data=data)
         else:
             response = requests.post(url, headers=HEADERS, json=data)
         
-        result = response.json()
-        # If model is loading, wait 10 seconds and try again
+        try:
+            result = response.json()
+        except:
+            return {"error": "Invalid response from AI"}
+
         if isinstance(result, dict) and "estimated_time" in result:
-            time.sleep(10)
+            time.sleep(10) # Wait if model is loading
             continue
         return result
     return {"error": "Model took too long to load"}
 
 @app.route('/')
 def home():
-    return "Server is Running!"
+    return "AI Detector Server is Live!"
 
 @app.route('/detect-text', methods=['POST'])
 def detect_text():
@@ -41,7 +43,6 @@ def detect_text():
 def detect_image():
     if 'image' not in request.files:
         return jsonify({"error": "No image found"}), 400
-    
     file_data = request.files['image'].read()
     result = query_model(IMAGE_API_URL, file_data, is_binary=True)
     return jsonify(result)
